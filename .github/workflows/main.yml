@@ -1,0 +1,103 @@
+name: Production Deployment
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Triggers
+# ─────────────────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allow manual trigger from the GitHub UI
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Prevent concurrent deployments (never cancel an in-progress deploy)
+# ─────────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Jobs
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+
+  # ── 1. Lint & type-check ─────────────────────────────────────────────────
+  quality:
+    name: 🔍 Lint & Type-check
+    runs-on: self-hosted
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: 🔎 ESLint
+        run: npm run lint
+
+      - name: 🏷️  TypeScript
+        run: npx tsc --noEmit
+
+  # ── 2. Build & deploy ─────────────────────────────────────────────────────
+  deploy:
+    name: 🐳 Build & Deploy
+    runs-on: self-hosted
+    needs: quality          # Only deploy if quality checks pass
+    environment: production # Ties to GitHub "production" environment (optional secrets/rules)
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Build the prod Docker image (native ARM64 on the Pi – no QEMU needed)
+      # --pull always fetches the latest base images (node:20-alpine, etc.)
+      - name: 🔨 Build production image
+        run: docker compose build --pull prod
+
+      # Recreate the container with the new image, keep it running
+      - name: 🔄 Start / recreate container
+        run: docker compose up -d --force-recreate --remove-orphans prod
+
+      # Wait for the server to be ready before declaring success
+      - name: ✅ Health check
+        run: |
+          echo "Waiting for the app to be ready…"
+          for i in $(seq 1 10); do
+            if curl -sf http://localhost:3000 > /dev/null; then
+              echo "✅ App is up!"
+              exit 0
+            fi
+            echo "  attempt $i/10 – retrying in 3 s…"
+            sleep 3
+          done
+          echo "❌ Health check failed after 30 s"
+          docker compose logs prod --tail 50
+          exit 1
+
+      # Remove dangling layers left by the previous build to save disk space
+      - name: 🧹 Prune dangling images
+        if: always()
+        run: docker image prune -f
+
+      - name: 📣 Deployment summary
+        if: success()
+        run: |
+          echo "### 🚀 Deployed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **URL** | http://localhost:3000 |" >> $GITHUB_STEP_SUMMARY
+

@@ -52,4 +52,13 @@ export default tseslint.config(
 
   // Disable ESLint rules that conflict with Prettier
   prettierConfig,
+
+  // shadcn/ui generated components export both components and utilities (variants, contexts…)
+  // react-refresh doesn't apply to these files – disable the rule for the whole ui/ folder
+  {
+    files: ['src/app/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 );
