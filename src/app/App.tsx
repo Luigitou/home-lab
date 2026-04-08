@@ -36,7 +36,13 @@ export default function App() {
 
   return (
     <div
-      className="relative h-screen w-screen overflow-hidden bg-[#0a0a0e] text-slate-50 font-sans selection:bg-orange-500/30 flex items-center justify-center"
+      className="relative min-h-dvh w-full overflow-hidden bg-[#0a0a0e] text-slate-50 font-sans selection:bg-orange-500/30 flex items-center justify-center"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
       onMouseMove={handleMouseMove}
     >
       {/* Background Layer */}
@@ -114,25 +120,39 @@ export default function App() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.8, ease: 'easeOut' }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-slate-300 font-medium tracking-wide bg-white/[0.03] px-8 py-4 rounded-full border border-slate-400/20 backdrop-blur-md shadow-[0_0_25px_rgba(148,163,184,0.1)]"
         >
-          <div className="flex items-center gap-2.5">
-            <CircuitBoard className="w-4 h-4 text-rose-400" />
-            <span>Raspberry Pi 5</span>
+          {/* ── Mobile: 3 individual chips ────────────────────────────── */}
+          <div className="flex sm:hidden flex-row flex-wrap justify-center gap-2">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-slate-400/20 backdrop-blur-md text-sm text-slate-300 font-medium tracking-wide">
+              <CircuitBoard className="w-4 h-4 text-rose-400" />
+              <span>Raspberry Pi 5</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-slate-400/20 backdrop-blur-md text-sm text-slate-300 font-medium tracking-wide">
+              <MemoryStick className="w-4 h-4 text-blue-400" />
+              <span>16GB RAM</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-slate-400/20 backdrop-blur-md text-sm text-slate-300 font-medium tracking-wide">
+              <Cpu className="w-4 h-4 text-orange-400" />
+              <span>Quad-Core ARM</span>
+            </div>
           </div>
 
-          <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-600" />
-
-          <div className="flex items-center gap-2.5">
-            <MemoryStick className="w-4 h-4 text-blue-400" />
-            <span>16GB RAM</span>
-          </div>
-
-          <div className="hidden sm:block w-1 h-1 rounded-full bg-slate-600" />
-
-          <div className="flex items-center gap-2.5">
-            <Cpu className="w-4 h-4 text-orange-400" />
-            <span>Quad-Core ARM</span>
+          {/* ── Desktop: single pill ──────────────────────────────────── */}
+          <div className="hidden sm:flex flex-row items-center justify-center gap-6 text-sm text-slate-300 font-medium tracking-wide bg-white/[0.03] px-8 py-4 rounded-full border border-slate-400/20 backdrop-blur-md shadow-[0_0_25px_rgba(148,163,184,0.1)]">
+            <div className="flex items-center gap-2.5">
+              <CircuitBoard className="w-4 h-4 text-rose-400" />
+              <span>Raspberry Pi 5</span>
+            </div>
+            <div className="w-1 h-1 rounded-full bg-slate-600" />
+            <div className="flex items-center gap-2.5">
+              <MemoryStick className="w-4 h-4 text-blue-400" />
+              <span>16GB RAM</span>
+            </div>
+            <div className="w-1 h-1 rounded-full bg-slate-600" />
+            <div className="flex items-center gap-2.5">
+              <Cpu className="w-4 h-4 text-orange-400" />
+              <span>Quad-Core ARM</span>
+            </div>
           </div>
         </motion.div>
 
