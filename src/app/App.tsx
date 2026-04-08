@@ -1,8 +1,10 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 import type { MouseEvent, ReactNode } from 'react';
 import { CircuitBoard, Cpu, Github, Linkedin, MemoryStick } from 'lucide-react';
+import { useAnimatedFavicon } from './hooks/useAnimatedFavicon';
 
 export default function App() {
+  useAnimatedFavicon();
   // Mouse position state for parallax (normalized from 0 to 1)
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
