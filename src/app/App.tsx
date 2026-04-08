@@ -144,12 +144,12 @@ export default function App() {
           className="flex items-center gap-6 mt-4"
         >
           <SocialLink
-            href="https://github.com"
+            href="https://github.com/Luigitou"
             icon={<Github className="w-5 h-5" />}
             label="GitHub"
           />
           <SocialLink
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/louis-bellefemine/"
             icon={<Linkedin className="w-5 h-5" />}
             label="LinkedIn"
           />
